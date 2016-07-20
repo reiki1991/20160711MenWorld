@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>金利来</title>
+    <meta name="description" content="金利来 goldlion男人的世界" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <meta name="apple-mobile-web-app-status-bar-style" content="black"/>
+    <meta name="format-detection" content="telephone=no"/>
+    <meta name="author" content="Reiki" />
+    <!-- build:css css/all.min.css -->
+    <link rel="stylesheet" href="./css/app.css">
+    <!-- endbuild -->
+</head>
+<body class="toplist_body">
+<div class="g_tipwrap toplist_mask">
+    <img class="toplist_tit" src="./imgs/toplist_tit.png" alt="金利来">
+    <ul class="clearfix toplist_box g_scroll3" id="templ_wrap1">
+        <script id="templ_data1" type="text/html">
+            <% for(var i=0,len=list.length; i<len; i++){ var item = list[i]; %>
+            <li class="fl toplist_boxli">
+                <a href="story.html?type=<%=item.type%>&&storyId=<%=item.Id%>">
+                    <span class="sign1">Top<%=10*(curpage-1)+(i+1)%></span>
+                    <div class="g_imgwrap" style="background-image: url(../<%=item.Pic%>);"></div>
+                    <p class="word1"><span class="fr word2"><%=item.UserName%></span>阅历值<%=item.VoteNo%></p>
+                </a>
+            </li>
+            <% } %>
+        </script>
+    </ul>
+    <button class="g_btn1 toplist_btn1 go_mylist">我的大片</button>
+    <button class="g_btn1 toplist_btn1"><a href="index.html">返回</a></button>
+</div>
+<!-- build:js js/template.min.js -->
+<script src="js/template-native.js"></script>
+<!-- endbuild -->
+<!-- build:js js/all.min.js -->
+<script src="js/zepto.min.js"></script>
+<script src="js/Core.js"></script>
+<script src="js/Http.js"></script>
+<script src="js/app.js"></script>
+<!-- endbuild -->
+</body>
+</html>

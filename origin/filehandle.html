@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>金利来</title>
+    <meta name="description" content="金利来 goldlion男人的世界" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <meta name="apple-mobile-web-app-status-bar-style" content="black"/>
+    <meta name="format-detection" content="telephone=no"/>
+    <meta name="author" content="Reiki" />
+    <!-- build:css css/all.min.css -->
+    <link rel="stylesheet" href="./css/app.css">
+    <!-- endbuild -->
+</head>
+<body class="fh_state1">
+<a class="g_back" href="javascript:history.back();">返回</a>
+<input type="file" id="fh_file" name="file"/>
+<button class="fh_ele1 fh_getfile fh_file1"><img class="fh_getfile1" src="./imgs/g_filechoose.png" alt="金利来"></button>
+<div class="fhandle_box fhandle_box1 fh_ele2 fh_ele3">
+    <img class="fh_ele3 fh_tip" src="./imgs/g_tipshake.png" alt="金利来">
+    <canvas id="fh_cvs" width="460" height="460" style="width:230px;height: 230px;">您的浏览器不支持canvas绘图</canvas>
+    <img class="fh_pattern1" src="./imgs/g_pattern2.png" alt="金利来">
+    <p class="fh_ele2 fh_word1">写下关于你的大片的心情歌词</p>
+    <!--<input class="fh_ele2 fh_lyrics" type="text" value="" placeholder="只想追赶生命里的" maxlength="10">-->
+    <div contenteditable="true" class="fh_ele2 fh_lyrics"></div>
+    <button class="fh_ele2 g_btn1 fh_btn fh_getfile">重拍</button>
+    <button class="fh_ele2 g_btn1 fh_btn fh_sure">确认</button>
+    <div class="fh_ele3 fh_word1">还差最后一步<br>即可生成你的大片故事<br>快来书写你的人生吧</div><br>
+    <button class="fh_ele3 g_btn1 fh_sub">我的故事</button>
+</div>
+<div class="storycreate_box fh_ele4">
+    <ul class="sc_box1">
+        <li class="sc_word1 g_men1">梦想是所有故事的启航<br>请分享你的梦想吧</li>
+        <li class="sc_word1 g_men2">经历不可重来，所以有些经历无比珍贵<br>请诉说你的故事吧</li>
+        <li class="sc_word1 g_men3">关于成就，我看到的是这一路上的热血<br>分享这一刻的光荣吧</li>
+        <li class="sc_word1 g_men4">我珍惜的，是与兄弟的奋斗时光<br>写下这燃情岁月吧</li>
+    </ul>
+    <div class="sc_wrap">
+        <div class="g_scroll2 sc_story" contenteditable="true"></div>
+    </div>
+    <div class="sc_btn1"><button class="g_btn1">生成我的专属大片</button></div>
+</div>
+<audio id="media_shake" src="./imgs/shake.mp3"></audio>
+<!-- build:js js/filehandle.min.js -->
+<script type="text/javascript" src="js/fileUp/mobileBUGFix.mini.js" ></script>
+<script type="text/javascript" src="js/fileUp/exif.js"></script>
+<script type="text/javascript" src="js/fileUp/uploadImage.js" ></script>
+<script src="js/hammer.js"></script>
+<!-- endbuild -->
+<!-- build:js js/shake.min.js -->
+<script src="js/shake.js"></script>
+<!-- endbuild -->
+<!-- build:js js/all.min.js -->
+<script src="js/zepto.min.js"></script>
+<script src="js/Core.js"></script>
+<script src="js/Http.js"></script>
+<script src="js/app.js"></script>
+<!-- endbuild -->
+</body>
+</html>
