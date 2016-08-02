@@ -19,7 +19,7 @@ var paths = {
   scripts: ['origin/js/**/*.js'],
   imgs: 'origin/imgs/**/*',
   css: 'origin/css/**/*.css',
-  html: 'origin/**/*.html'
+  html: ['origin/**/*.php','origin/**/*.html']
 };
 
 // Not all tasks need to use streams

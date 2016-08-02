@@ -4,7 +4,7 @@ var Core = {
         var sty = _style?_style:"tip_default";
         var tiphtml = '<div class="tip_box '+sty+' '+randomClass+'">'+_info+'</div>';
         $("body").append(tiphtml);
-        setTimeout(function(){ $("."+randomClass).fadeOut(); setTimeout(function(){ $("."+randomClass).remove(); },1000) },_hideTime?_hideTime:2000)
+        setTimeout(function(){ $("."+randomClass).fadeOut(); setTimeout(function(){ $("."+randomClass).remove(); },1000) },_hideTime?_hideTime:2000);
     },
     tip2: function (_info, _btntxt, _style) { //style是额外样式，方便拓展
         var randomClass = "tip"+Math.round(Math.random()*1000000000);

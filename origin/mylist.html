@@ -22,7 +22,7 @@
             <% for(var i=0,len=list.length; i<len; i++){ var item = list[i]; %>
             <li class="fl">
                 <a href="story.html?my=true&&type=<%=item.type%>&&storyId=<%=item.Id%>">
-                    <div class="g_imgwrap" style="background-image: url(../<%=item.Pic%>);">&nbsp;</div>
+                    <div class="g_imgwrap" style="background-image: url(<%=item.Pic%>);">&nbsp;</div>
                     <button class="mylist_btn">查看</button>
                 </a>
             </li>

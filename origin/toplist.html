@@ -22,7 +22,7 @@
             <li class="fl toplist_boxli">
                 <a href="story.html?type=<%=item.type%>&&storyId=<%=item.Id%>">
                     <span class="sign1">Top<%=10*(curpage-1)+(i+1)%></span>
-                    <div class="g_imgwrap" style="background-image: url(../<%=item.Pic%>);"></div>
+                    <div class="g_imgwrap" style="background-image: url(<%=item.Pic%>);"></div>
                     <p class="word1"><span class="fr word2"><%=item.UserName%></span>阅历值<%=item.VoteNo%></p>
                 </a>
             </li>
@@ -30,7 +30,7 @@
         </script>
     </ul>
     <button class="g_btn1 toplist_btn1 go_mylist">我的大片</button>
-    <button class="g_btn1 toplist_btn1"><a href="index.html">返回</a></button>
+    <button class="g_btn1 toplist_btn1"><a href="index.php">返回</a></button>
 </div>
 <!-- build:js js/template.min.js -->
 <script src="js/template-native.js"></script>

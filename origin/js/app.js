@@ -1,9 +1,11 @@
 var App = {
     loginUrl: "http://goldlion.gz.bolaa.cc/wxapi.php",
     init: function () { //初始化
-        var _curUrl = window.location.href, _curUrl = _curUrl.substring(0,_curUrl.indexOf('.html')),
+        var _curUrl = window.location.href, _curUrl = _curUrl.substring(0,_curUrl.indexOf('.html') || _curUrl.indexOf('.php')),
             _curhtmlname = _curUrl ? _curUrl.substring(_curUrl.lastIndexOf('/')+1, _curUrl.length) : "index";
         App[_curhtmlname]();
+        //是否分享回流
+        (Core.getParam("uid")) && (Http.actionTotal("shareback"));
     },
     index: function () {
         $(".in_tipbox").find(" .g_tipcon").css("height",document.documentElement.clientHeight*0.5+"px");
@@ -13,7 +15,7 @@ var App = {
         });
     },
     choose: function () {
-        Core.tip2("男人的世界是星辰与大海<br>选择一个阶段<br>来分享你的故事吧");
+        Core.tip2("男人，坚忍的外表下<br>蕴藏的是丰富的情感<br>选择一个话题，讲述你的故事<br>让我们走入专属于你的“男人的世界”","进入","choose_tipbox");
     },
     toplist: function () {
         //禁止iphone上下回弹
@@ -76,7 +78,6 @@ var App = {
         });
         //获取故事详情
         Http.getpicInfo(_storyId,function (_data) {
-            console.log(_data.Info);
             var _infoWrap = "<h3>"+_data.Info+"</h3>"
             _data.Info = $(_infoWrap).text().replace(/\n/g,'<br/>').replace(/\s/g, '&nbsp;');
             //_data.Info = _data.Info.replace(/\n/g,'<br/>').replace(/\s/g, '&nbsp;');//textArea的换行&空格处理
@@ -113,18 +114,19 @@ var App = {
         //为TA增添阅历值
         $("body").on(_triggerEvent,".story_btn2",function () {
             Http.vote(_storyId, function (_data) {
-                (_data==-1) && (window.location.href = App.loginUrl);
+                (_data==-1) && (window.location.href = App.loginUrl+"?"+window.location.href.split(".html?")[1]);
                 (_data==-2) && (Core.tip2("您今天的投票已用完"));
-                (_data==-3) && (Core.tip2("您已投过票"));
+                (_data==-3) && (Core.tip2('您已投过票','<a href="choose.html">制作我的专属大片</a>'));
                 (_data==1) && (function () { //投票成功
                     $("#story_voteNo").html(parseInt($("#story_voteNo").html())-0+1+"&nbsp;");
-                    Http.mygetpiclist(function (_data) { //检测我是否分享过人生故事
+                    Core.tip2("您已成功为TA增添阅历！<br>赶快生成专属大片<br>将您的人生故事分享给大家吧！",'<a href="choose.html">制作我的专属大片</a>');
+                    /*Http.mygetpiclist(function (_data) { //检测我是否分享过人生故事
                         if(_data && _data.length){
                             Core.tip2("您已成功为TA增添阅历值");
                         }else{
                             Core.tip2("您已成功为TA增添阅历！<br>赶快生成专属大片<br>将您的人生故事分享给大家吧！",'<a href="choose.html">制作我的专属大片</a>');
                         }
-                    });
+                    });*/
                 })();
             });
         });
@@ -138,25 +140,19 @@ var App = {
         //生成我的专属大片
         $("body").on(_triggerEvent,".sc_btn1",function () {
             var _story = $(".sc_story").html();
-            if(!_story){
-                Core.tip2("请填写你的大片故事！");
-                return;
-            }
-            Core.load("正在上传您的大片....");
+            //if(!_story){ Core.tip2("请填写你的大片故事！"); return; }
+            Core.load("正在生成您的大片....");
             var base64 = cvs.toDataURL("image/png");
             //后台提交个人大片
             Http.savePic(base64, _lyrics, _story, menType, function (_data) {
                 Core.removeload();
-                (_data==-1) && (window.location.href = App.loginUrl);
+                (_data==-1) && (window.location.href = App.loginUrl+"?"+window.location.href.split(".html?")[1]);
                 (_data==-2 || _data==0) && (Core.tip("上传失败"));
                 (_data>0) && (window.location.href = "share.html?type="+menType+"&&storyId="+_data);
             });
         });
         //点击【我的故事】按钮,base64图片上传提交
         $("body").on(_triggerEvent,".fh_sub",function(){
-            //移除shake事件
-            colorshake.stop();
-            window.removeEventListener('shake', colorshakehandle, false);
             $("body").removeClass("fh_state3").addClass("fh_state4");
         });
         var _triggerbtn;
@@ -189,20 +185,17 @@ var App = {
         var bgImg_x, bgImg_y; //图片在canvas上的x值，y值
         var bgImg_scale; //图片的缩放比例
         var bgImg_curW, bgImg_curH; //图片在canvas上显示的宽度，高度
-        //文字左右音乐标识符
-        var patternL=new Image(), patternR=new Image();
-        var patternGap = 10; //图标与文字空隙间隔
-        var patternW = 12*cvsRadio, patternH = 18*cvsRadio; //左右音乐图标在cvs中显示的宽高
-        var patternLX, patternRX; //音乐标识在cvs中显示位置的x坐标值
-        var patternY = cvsW-patternH-56; //音乐标识在cvs中显示位置的x坐标值
+        var bgImg_limit = 200; //图片限制在相框内的系数
+        //遮罩层
+        var bgMask = new Image();
         //歌词
-        var _lyrics;
-        $("body").on("keyup",".fh_lyrics",function () {
-            _lyrics = $(".fh_lyrics").html();
+        var _lyrics, _lyricsL;
+        $(".fh_lyrics").change(function(){
+            _lyrics = $(".fh_lyrics").val();
             addText(_lyrics);
+            $("#fh_restNum").html(_lyrics.length);
         });
         //摇一摇换色处理
-        var Media = document.getElementById("media_shake");
         var colorCount = 1, colorCountName = ["default","yellow","blue","gray"];
         var colorLen = cvsW * cvsH * 4;
         var colorOriginData, colorCurData;
@@ -238,63 +231,54 @@ var App = {
                 }
             }
         }
-        var colorshake, colorshakehandle = function (e) {
-            e.preventDefault();
-            Media.play();
+        var colorchange = function () {
             (!colorOriginData) && (colorOriginData = ctx.getImageData(0, 0, cvsW, cvsW));
             colorCurData = ctx.createImageData(colorOriginData);
             colorCurData.data.set(colorOriginData.data);
-            (colorCount<colorCountName.length) ? (++colorCount) : (colorCount=1);
             colorFun[colorCountName[colorCount-1]](colorCurData.data); //data处理
             ctx.putImageData(colorCurData, 0, 0);
         };
+        $(".fhandle_box").on(_triggerEvent,".g_arrowL",function () {
+            (colorCount==1) ? (colorCount=4) : (colorCount--);
+            colorchange();
+        });
+        $(".fhandle_box").on(_triggerEvent,".g_arrowR",function () {
+            (colorCount<colorCountName.length) ? (++colorCount) : (colorCount=1);
+            colorchange();
+        });
         //禁止iphone上下回弹
         cvs.addEventListener("touchmove", function(e){
             e.preventDefault();
         }, true);
         //点击【确认】按钮
         $("body").on(_triggerEvent,".fh_sure",function () {
-            _lyrics = $(".fh_lyrics").html();
+            _lyrics = $(".fh_lyrics").val();
             !_lyrics && (Core.tip2("无歌词不人生<br>请补充填写心情歌词"));
             if(_lyrics){
                 addText(_lyrics);
-                colorshake = new Shake();
-                colorshake.start();
-                window.addEventListener('shake', colorshakehandle, false);
                 $("body").removeClass("fh_state2").addClass("fh_state3");
             }
         });
         function addText(_txt,_ismove) {
+            var fillText = function () {
+                (_txt.length) < 11 ? (ctx.fillText(_txt,230,420)) : (function () {
+                    ctx.fillText(_txt.substring(0,10), 230,385);
+                    ctx.save();
+                    ctx.textAlign="left";
+                    !_ismove && (_lyricsL = 230-(ctx.measureText(_txt.substring(0,10)).width)/2+2);
+                    ctx.fillText(_txt.substring(10,_txt.length) ,_lyricsL,425)
+                    ctx.restore();
+                })();
+            }
             if(_ismove){
-                ctx.fillText(_txt,230,400);
-                ctx.drawImage(patternL, patternLX, patternY, patternW, patternH);
-                ctx.drawImage(patternR, patternRX, patternY, patternW, patternH);
+                fillText();
                 return;
             }else{
                 ctx.clearRect(0, 0, cvsW, cvsH);
-                ctx.drawImage(bgImg, bgImg_x, bgImg_y, bgImg_curW, bgImg_curH);
-                ctx.fillText(_txt,230,400);
+                bgImg && ctx.drawImage(bgImg, bgImg_x, bgImg_y, bgImg_curW, bgImg_curH);
+                bgMask && ctx.drawImage(bgMask,0,0,cvsW,cvsH);
+                fillText();
                 var txtW = ctx.measureText(_txt).width;
-                var drawpatternL = function () {
-                    patternLX = cvsW/2-txtW/2-patternW-patternGap;
-                    ctx.drawImage(patternL, patternLX, patternY, patternW, patternH);
-                };
-                var drawpatternR = function () {
-                    patternRX = cvsW/2+txtW/2+patternGap;
-                    ctx.drawImage(patternR, patternRX, patternY, patternW, patternH);
-                };
-                (patternL.src) ? (drawpatternL()) : (function () {
-                    patternL.src = "./imgs/g_txtL.png";
-                    patternL.onload = function () {
-                        drawpatternL();
-                    }
-                })();
-                (patternR.src) ? (drawpatternR()) : (function () {
-                    patternR.src = "./imgs/g_txtR.png";
-                    patternR.onload = function () {
-                        drawpatternR();
-                    }
-                })();
             }
         }
         function initImg(_base64) { //_base64 是正确旋转后的base64格式图片
@@ -312,6 +296,17 @@ var App = {
                 //初始化绘制
                 ctx.clearRect(0, 0, cvsW, cvsH);
                 ctx.drawImage(bgImg, bgImg_x, bgImg_y, bgImg_curW, bgImg_curH);
+                //加载遮罩图
+                if(bgMask.src){
+                    ctx.drawImage(bgMask,0,0,cvsW,cvsH);
+                    _lyrics && (addText(_lyrics,true));
+                }else{
+                    bgMask.src = "./imgs/cvsmask.png";
+                    bgMask.onload = function () {
+                        ctx.drawImage(bgMask,0,0,cvsW,cvsH);
+                        _lyrics && (addText(_lyrics,true));
+                    }
+                }
                 //添加手势编辑事件
                 eventRegisterFirst && addEventHandlers();
             };
@@ -319,13 +314,21 @@ var App = {
         var eventRegisterFirst = true; //是否第一次注册该事件
         function addEventHandlers(){
             eventRegisterFirst = false;
-            var hammerCvs = new Hammer(cvs);
+            var bgImg_limitFun = function () {
+                (_curX < bgImg_limit-bgImg_curW) && (_curX = bgImg_limit-bgImg_curW);
+                (_curX > cvsW-bgImg_limit) && (_curX = cvsW-bgImg_limit);
+                (_curY < bgImg_limit-bgImg_curH) && (_curY = bgImg_limit-bgImg_curH);
+                (_curY > cvsH-bgImg_limit) && (_curY = cvsH-bgImg_limit);
+            }
+            var hammerCvs = new Hammer(cvs), _curX, _curY;
             hammerCvs.get('pan').set({ direction: Hammer.DIRECTION_ALL });//允许识别器识别全部方位的pan,默认只能识别水平方向
             hammerCvs.on("pan", function(e){
                 ctx.clearRect(0, 0, cvsW, cvsH);
-                var _curX = bgImg_x + e.deltaX;
-                var _curY = bgImg_y + e.deltaY;
+                _curX = bgImg_x + e.deltaX;
+                _curY = bgImg_y + e.deltaY;
+                bgImg_limitFun && bgImg_limitFun();
                 ctx.drawImage(bgImg, _curX, _curY, bgImg_curW, bgImg_curH);
+                ctx.drawImage(bgMask,0,0,cvsW,cvsH);
                 _lyrics && (addText(_lyrics,true));
                 if(e.eventType == "4"){ //手指离开屏幕
                     bgImg_x = _curX;
@@ -335,9 +338,11 @@ var App = {
             hammerCvs.get('pinch').set({ enable: true });//允许pinch事件，默认禁止
             hammerCvs.on("pinch", function(e){
                 ctx.clearRect(0, 0, cvsW, cvsH);
-                var _curX = bgImg_x + (bgImg_curW-bgImg_curW * e.scale)/2;
-                var _curY = bgImg_y + (bgImg_curH-bgImg_curH * e.scale)/2;
+                _curX = bgImg_x + (bgImg_curW-bgImg_curW * e.scale)/2;
+                _curY = bgImg_y + (bgImg_curH-bgImg_curH * e.scale)/2;
+                bgImg_limitFun && bgImg_limitFun();
                 ctx.drawImage(bgImg, _curX, _curY, bgImg_curW * e.scale, bgImg_curH * e.scale);
+                ctx.drawImage(bgMask,0,0,cvsW,cvsH);
                 _lyrics && (addText(_lyrics,true));
                 if(e.eventType == "4"){ //手指离开屏幕
                     bgImg_scale = e.scale;
@@ -353,7 +358,7 @@ var App = {
 $(document).ready(function () {
     window.isDebugger = false;
     isDebugger && (window.onerror = function (e) { alert(e); } );//页面error提示
-    window.log = function (m) { (document.ontouchstart!==null) ?  (isDebugger &&　alert(m)) : (console.log(m)); }
+    window.log = function (m) { (document.ontouchstart!==null) ?  (isDebugger && (alert(m))) : (console.log(m)); }
     window._triggerEvent = (document.ontouchstart!==null) ?  'click' : 'touchstart';
     App.init();
     //给安卓添加特有的样式
