@@ -63,6 +63,31 @@ var App = {
             $('#templ_wrap1').append(html);
         });
     },
+    info: function () {
+        var _storyId = Core.getParam("storyId");
+        var _menType = Core.getParam("type");
+        $("body").addClass("body_men"+_menType);
+        //用户信息提交
+        var _pattern = /^1[34578]\d{9}$/;
+        $('body').on(_triggerEvent, ".info_sub", function(e){
+            var name = $(".info_name").val();
+            var phone = $(".info_phone").val();
+            if(name && phone){
+                if (_pattern.test(phone)) {
+                    Http.updateUserinfo(name, phone, function (_data) {
+                        //TODO 信息提交成功后跳转
+                        (_data==0) && (window.location.href = App.loginUrl+"?"+window.location.href.split(".html?")[1]);
+                        (_data==2) && (Core.tip2("请将信息填写完整"));
+                        (_data==1) && (window.location.href = "share.html?type="+_menType+"&&storyId="+_storyId);
+                    });
+                }else{
+                    Core.tip2("请填写正确的手机号码");
+                }
+            }else{
+                Core.tip2("请将信息填写完整。");
+            }
+        });
+    },
     share: function () {
         var _storyId = Core.getParam("storyId");
         var _menType = Core.getParam("type");
@@ -148,7 +173,13 @@ var App = {
                 Core.removeload();
                 (_data==-1) && (window.location.href = App.loginUrl+"?"+window.location.href.split(".html?")[1]);
                 (_data==-2 || _data==0) && (Core.tip("上传失败"));
-                (_data>0) && (window.location.href = "share.html?type="+menType+"&&storyId="+_data);
+                if(_data>0){ //上传成功
+                    var _storyId = _data;
+                    Http.getuserinfo(function(_data){
+                        //TODO share或info页面跳转
+                        window.location.href = ((_data && _data.Tel) ? "share": "info") + ".html?type="+menType+"&&storyId="+_storyId;
+                    });
+                }
             });
         });
         //点击【我的故事】按钮,base64图片上传提交

@@ -80,6 +80,20 @@ var Http = {
         }
         this.request("", data, success, error);
     },
+    getuserinfo: function(success, error){ //获取个人资料
+        var data = {
+            "action": "getuserinfo"
+        }
+        this.request("", data, success, error);
+    },
+    updateUserinfo: function(username, tel, success, error){ //上传个人信息
+        var data = {
+            "action": "update_userinfo",
+            "username": username,
+            "tel": tel
+        }
+        this.request("", data, success, error);
+    },
     actionTotal: function(code, success, error){ //会员统计数据
         var data = {
             "action": "total",
@@ -89,7 +103,7 @@ var Http = {
             if(_data==2){
                 console.log("请输入正确的code");
             }
-            success &&　success(_data);
+            success && success(_data);
         }, error);
     }
 }
